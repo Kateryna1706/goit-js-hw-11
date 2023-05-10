@@ -12,40 +12,16 @@ body {
   line-height: 1.5;
 }
 
-#search-box {
-  font: inherit;
-  padding: 8px;
-  max-width: 320px;
-  margin-bottom: 16px;
-}
-
-.country-list {
+.gallery {
   display: flex;
-  flex-direction: column;
-  row-gap: 15px;
-
-  padding-left: 0;
-  margin: 0;
+  flex-wrap: wrap;
+  gap: 30px;
 }
 
-.country-list-item {
-  display: flex;
+.photo-card {
+  width: calc((100% - 60px) / 3);
 }
 
-.list-item-paragraph {
-  margin-left: 15px;
-  margin-top: 0;
-  margin-bottom: 0;
-
-  font-size: 20px;
-  font-weight: 400;
-}
-
-.item-paragraph {
-  display: inline;
-
-  margin-left: 10px;
-
-  font-size: 30px;
-  font-weight: 600;
+.images {
+  display: block;
 }
