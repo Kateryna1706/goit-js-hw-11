@@ -1,11 +1,13 @@
 import './css/styles.css';
 import Notiflix from 'notiflix';
 import { fetchImages } from './fetchImages.js';
+import SimpleLightbox from 'simplelightbox';
 
 const refs = {
   searchForm: document.querySelector('#search-form'),
   gallery: document.querySelector('.gallery'),
   loadMore: document.querySelector('.load-more'),
+  submit: document.querySelector('.submit'),
 };
 
 let searchQuery = '';
@@ -20,6 +22,9 @@ function onSubmit(event) {
   refs.loadMore.classList.add('hide');
   page = 1;
   searchQuery = event.currentTarget.elements.searchQuery.value;
+  if (searchQuery === '') {
+    return Notiflix.Notify.failure('Enter value!.');
+  }
   fetchImages(searchQuery, page)
     .then(response => {
       if (response.data.totalHits === 0) {
@@ -29,11 +34,15 @@ function onSubmit(event) {
       } else {
         renderGallery(response);
         refs.loadMore.classList.remove('hide');
+        if (searchQuery === '') {
+          refs.submit.setAttribute('disabled', '');
+        }
       }
     })
     .catch(error => {
       Notiflix.Notify.failure(error.message);
     });
+  event.currentTarget.reset();
 }
 
 function renderGallery(response) {
