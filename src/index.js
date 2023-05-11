@@ -40,19 +40,25 @@ function renderGallery(response) {
   const marcup = response.data.hits
     .map(image => {
       return `<div class="photo-card">
-      <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" class="images"/>
+      <img src="${image.webformatURL}" alt="${image.tags}" height="300" loading="lazy" class="images"/>
       <div class="info">
         <p class="info-item">
-          <b>Likes:</b> ${image.likes}
+          <b>Likes</b><span
+          >${image.likes}</span
+         >
         </p>
         <p class="info-item">
-          <b>Views:</b> ${image.views}
+          <b>Views</b><span>${image.views}</span>
         </p>
         <p class="info-item">
-          <b>Comments:</b> ${image.comments}
+          <b>Comments</b><span
+          >${image.comments}</span
+         >
         </p>
         <p class="info-item">
-          <b>Downloads:</b> ${image.downloads}
+          <b>Downloads</b><span
+          >${image.downloads}</span
+         >
         </p>
       </div>
     </div>`;
