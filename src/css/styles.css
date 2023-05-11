@@ -12,16 +12,21 @@ body {
   line-height: 1.5;
 }
 
+.hide {
+  display: none;
+}
+
 .gallery {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px;
+  gap: 20px;
 }
 
 .photo-card {
-  width: calc((100% - 60px) / 3);
+  width: calc((100% - 60px) / 4);
 }
 
 .images {
   display: block;
+  width: 100%;
 }
