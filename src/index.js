@@ -2,6 +2,7 @@ import './css/styles.css';
 import Notiflix from 'notiflix';
 import { fetchImages } from './fetchImages.js';
 import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const refs = {
   searchForm: document.querySelector('#search-form'),
@@ -10,16 +11,22 @@ const refs = {
   submit: document.querySelector('.submit'),
 };
 
+const lightbox = new SimpleLightbox('.gallery a', {
+  captions: true,
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+});
+
 let searchQuery = '';
 let page = 1;
 
 refs.searchForm.addEventListener('submit', onSubmit);
-refs.loadMore.addEventListener('click', onClick);
+refs.loadMore.addEventListener('click', loadMore);
 
 function onSubmit(event) {
   event.preventDefault();
   resetMarcup();
-  refs.loadMore.classList.add('hide');
   page = 1;
   searchQuery = event.currentTarget.elements.searchQuery.value;
   if (searchQuery === '') {
@@ -34,8 +41,9 @@ function onSubmit(event) {
       } else {
         renderGallery(response);
         refs.loadMore.classList.remove('hide');
-        if (searchQuery === '') {
-          refs.submit.setAttribute('disabled', '');
+        lightbox.refresh();
+        if (response.data.hits.length < 40) {
+          refs.loadMore.classList.add('hide');
         }
       }
     })
@@ -47,9 +55,11 @@ function onSubmit(event) {
 
 function renderGallery(response) {
   const marcup = response.data.hits
-    .map(image => {
-      return `<div class="photo-card">
-      <img src="${image.webformatURL}" alt="${image.tags}" height="300" loading="lazy" class="images"/>
+    .map(image => { 
+      return `<li class="gallery__item"">
+      <a href="${image.largeImageURL}" class="gallery__link">
+      <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" height="300px" class="gallery__image""/>
+      </a>
       <div class="info">
         <p class="info-item">
           <b>Likes</b><span
@@ -70,7 +80,7 @@ function renderGallery(response) {
          >
         </p>
       </div>
-    </div>`;
+    </li>`;
     })
     .join('');
   refs.gallery.insertAdjacentHTML('beforeend', marcup);
@@ -80,16 +90,26 @@ function resetMarcup() {
   refs.gallery.innerHTML = '';
 }
 
-function onClick() {
+function loadMore() {
   page += 1;
   fetchImages(searchQuery, page).then(response => {
-    if (response.data.totalHits === 0) {
-      Notiflix.Notify.failure(
-        'We are sorry, but you have reached the end of search results.'
-      );
-      refs.loadMore.classList.add('hide');
+    if (response.data.hits.length < 40) {
+      showNotification();
+      renderGallery(response);
     } else {
+      Notiflix.Notify.info(
+        `Hooray! We found ${response.data.totalHits} images.`
+      );
       renderGallery(response);
     }
   });
 }
+
+function showNotification() {
+  Notiflix.Notify.failure(
+    'We are sorry, but you have reached the end of search results.'
+  );
+  refs.loadMore.classList.add('hide');
+}
+
+
