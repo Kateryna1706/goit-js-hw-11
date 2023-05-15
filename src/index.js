@@ -24,38 +24,42 @@ let page = 1;
 refs.searchForm.addEventListener('submit', onSubmit);
 refs.loadMore.addEventListener('click', loadMore);
 
-function onSubmit(event) {
+async function onSubmit(event) {
   event.preventDefault();
   resetMarcup();
+  refs.loadMore.classList.add('hide');
   page = 1;
   searchQuery = event.currentTarget.elements.searchQuery.value;
   if (searchQuery === '') {
     return Notiflix.Notify.failure('Enter value!.');
   }
-  fetchImages(searchQuery, page)
-    .then(response => {
-      if (response.data.totalHits === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        renderGallery(response);
-        refs.loadMore.classList.remove('hide');
-        lightbox.refresh();
-        if (response.data.hits.length < 40) {
-          refs.loadMore.classList.add('hide');
-        }
+  try {
+    const response = await fetchImages(searchQuery, page);
+    if (response.data.totalHits === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      Notiflix.Notify.info(
+        `Hooray! We found ${response.data.totalHits} images.`
+      );
+      renderGallery(response);
+      refs.loadMore.classList.remove('hide');
+      lightbox.refresh();
+      if (response.data.hits.length < 40) {
+        refs.loadMore.classList.add('hide');
       }
-    })
-    .catch(error => {
-      Notiflix.Notify.failure(error.message);
-    });
+    }
+  } catch (error) {
+    Notiflix.Notify.failure(error.message);
+  }
+  console.log(event.currentTarget);
   event.currentTarget.reset();
 }
 
 function renderGallery(response) {
   const marcup = response.data.hits
-    .map(image => { 
+    .map(image => {
       return `<li class="gallery__item"">
       <a href="${image.largeImageURL}" class="gallery__link">
       <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" height="300px" class="gallery__image""/>
@@ -97,10 +101,8 @@ function loadMore() {
       showNotification();
       renderGallery(response);
     } else {
-      Notiflix.Notify.info(
-        `Hooray! We found ${response.data.totalHits} images.`
-      );
       renderGallery(response);
+      lightbox.refresh();
     }
   });
 }
@@ -111,5 +113,3 @@ function showNotification() {
   );
   refs.loadMore.classList.add('hide');
 }
-
-
