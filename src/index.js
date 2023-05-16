@@ -9,6 +9,7 @@ const refs = {
   gallery: document.querySelector('.gallery'),
   loadMore: document.querySelector('.load-more'),
   submit: document.querySelector('.submit'),
+  searchFormInput: document.querySelector('.search-form-input'),
 };
 
 const lightbox = new SimpleLightbox('.gallery a', {
@@ -20,6 +21,7 @@ const lightbox = new SimpleLightbox('.gallery a', {
 
 let searchQuery = '';
 let page = 1;
+const perPage = 40;
 
 refs.searchForm.addEventListener('submit', onSubmit);
 refs.loadMore.addEventListener('click', loadMore);
@@ -34,14 +36,16 @@ async function onSubmit(event) {
     return Notiflix.Notify.failure('Enter value!.');
   }
   try {
-    const response = await fetchImages(searchQuery, page);
+    const response = await fetchImages(searchQuery, page, perPage);
     if (response.data.totalHits === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
     } else {
       Notiflix.Notify.info(
-        `Hooray! We found ${response.data.totalHits} images.`
+        `Hooray! We found ${response.data.totalHits} images and ${Math.ceil(
+          response.data.totalHits / perPage
+        )} pages.`
       );
       renderGallery(response);
       refs.loadMore.classList.remove('hide');
@@ -52,9 +56,9 @@ async function onSubmit(event) {
     }
   } catch (error) {
     Notiflix.Notify.failure(error.message);
+  } finally {
+    refs.searchFormInput.value = '';
   }
-  console.log(event.currentTarget);
-  event.currentTarget.reset();
 }
 
 function renderGallery(response) {
@@ -94,17 +98,18 @@ function resetMarcup() {
   refs.gallery.innerHTML = '';
 }
 
-function loadMore() {
+async function loadMore() {
   page += 1;
-  fetchImages(searchQuery, page).then(response => {
-    if (response.data.hits.length < 40) {
-      showNotification();
-      renderGallery(response);
-    } else {
-      renderGallery(response);
-      lightbox.refresh();
-    }
-  });
+  const response = await fetchImages(searchQuery, page, perPage);
+  if (page > response.data.totalHits / perPage) {
+    renderGallery(response);
+    lightbox.refresh();
+    refs.loadMore.classList.add('hide');
+    showNotification();
+  } else {
+    renderGallery(response);
+    lightbox.refresh();
+  }
 }
 
 function showNotification() {
