@@ -31,7 +31,7 @@ async function onSubmit(event) {
   resetMarcup();
   refs.loadMore.classList.add('hide');
   page = 1;
-  searchQuery = event.currentTarget.elements.searchQuery.value;
+  searchQuery = event.currentTarget.elements.searchQuery.value.trim();
   if (searchQuery === '') {
     return Notiflix.Notify.failure('Enter value!.');
   }
